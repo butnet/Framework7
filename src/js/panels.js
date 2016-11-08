@@ -73,7 +73,7 @@ app.initSwipePanels = function () {
     if (app.params.swipePanel) {
         panel = $('.panel.panel-' + app.params.swipePanel);
         side = app.params.swipePanel;
-        if (panel.length === 0) return;
+        if (panel.length === 0 && side !== 'both') return;
     }
     else {
         if (app.params.swipePanelOnlyClose) {
@@ -81,7 +81,7 @@ app.initSwipePanels = function () {
         }
         else return;
     }
-    
+
     var panelOverlay = $('.panel-overlay');
     var isTouched, isMoved, isScrolling, touchesStart = {}, touchStartTime, touchesDiff, translate, overlayOpacity, opened, panelWidth, effect, direction;
     var views = $('.' + app.params.viewsClass);
@@ -139,6 +139,16 @@ app.initSwipePanels = function () {
             }
             else {
                 direction = 'to-left';
+            }
+
+            if(side === 'both'){
+                if ($('.panel.active').length > 0) {
+                    side = $('.panel.active').hasClass('panel-left') ? 'left' : 'right';
+                }
+                else {
+                    side = direction === 'to-right' ? 'left' : 'right';
+                }
+                panel = $('.panel.panel-' + side);
             }
 
             if (
@@ -311,7 +321,8 @@ app.initSwipePanels = function () {
         panel.transition('').transform('');
         panelOverlay.css({display: ''}).transform('').transition('').css('opacity', '');
     }
-    $(document).on(app.touchEvents.start, handleTouchStart);
+    var passiveListener = app.touchEvents.start === 'touchstart' && app.support.passiveListener ? {passive: true, capture: false} : false;
+    $(document).on(app.touchEvents.start, handleTouchStart, passiveListener);
     $(document).on(app.touchEvents.move, handleTouchMove);
-    $(document).on(app.touchEvents.end, handleTouchEnd);
+    $(document).on(app.touchEvents.end, handleTouchEnd, passiveListener);
 };

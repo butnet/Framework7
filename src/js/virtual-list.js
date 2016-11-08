@@ -104,7 +104,7 @@ var VirtualList = function (listBlock, params) {
             }
         }
         else {
-            listHeight = items.length * vl.params.height / vl.params.cols;
+            listHeight = Math.ceil(items.length /  vl.params.cols) * vl.params.height;
             rowsPerScreen = Math.ceil(pageHeight / vl.params.height);
             rowsBefore = vl.params.rowsBefore || rowsPerScreen * 2;
             rowsAfter = vl.params.rowsAfter || rowsPerScreen;
@@ -257,9 +257,14 @@ var VirtualList = function (listBlock, params) {
         vl.render();
     };
     // Handle resize event
+    vl._isVisible = function (el) {
+        return !!( el.offsetWidth || el.offsetHeight || el.getClientRects().length );
+    };
     vl.handleResize = function (e) {
-        vl.setListSize();
-        vl.render(true);
+        if (vl._isVisible(vl.listBlock[0])) {
+            vl.setListSize();
+            vl.render(true);
+        }
     };
 
     vl.attachEvents = function (detach) {
